@@ -8,9 +8,15 @@
 # FALLBACK: when Nightshift is not configured, the client falls back to the OpenRouter free tier  # Design choice 2: the fallback keeps the demo alive.
 # (the seat nvidia/nemotron-3.5-super-vl:free was verified live in ARC on 2026-10-22).  # Design choice 2 continued: the proven fallback seat.
 # Zero third-party dependencies: it uses only Python's standard library, like the v1 engine.  # Design choice 3: no installs needed.
-# ASSUMPTION (flagged, to confirm from the workspace): Nightshift exposes an OpenAI-compatible  # Assumption: the Nightshift endpoint shape.
-# chat-completions endpoint at <NIGHTSHIFT_API_URL>/chat/completions with the Nemotron model named  # Assumption continued: the path and model naming.
-# by NEMOTRON_MODEL. If the workspace documents a different path, only NIGHTSHIFT_CHAT_PATH changes.  # Assumption continued: the single place to adjust.
+# CONFIRMED BY THE WORKSPACE SETUP GUIDE + RECON (2026-10-23): Nightshift is OpenAI-compatible -  # Confirmation: the endpoint shape is documented, not assumed.
+# base URL http://127.0.0.1:8088/v1 for local installs, chat at /v1/chat/completions, org id "1".  # Confirmation continued: the documented local shape.
+# Nightshift is LOCAL-ONLY software: there is no hosted console, no signup, and no cloud endpoint;  # Confirmation continued: local-only, per the recon.
+# the "Nightshift Console" is a tab inside the locally installed app, and the runtime token it  # Confirmation continued: where the token comes from.
+# generates is also written to <stateDir>/proxy-token. So this route is inherently a  # Confirmation continued: the token file location.
+# participant-machine route: env-gated below, and never expected to exist on a hosted demo box.  # Confirmation continued: why the fallback matters.
+# DOCUMENTED ENV NAMES (primary): METERLESS_BASE_URL, METERLESS_RUNTIME_TOKEN, METERLESS_MODEL  # Env contract: the documented names win.
+# (default meterless/auto). The older NIGHTSHIFT_API_URL / NIGHTSHIFT_API_KEY names still work  # Env contract continued: legacy names as fallbacks.
+# as fallbacks so earlier Stage 1/2 setups keep running unchanged.  # Env contract continued: nothing breaks.
 # Import the JSON module so we can encode requests and decode replies.  # Library: json.
 import json  # Make the json module available.
 # Import the OS module so we can read keys, URLs, and model overrides from the environment.  # Library: os.
@@ -23,8 +29,8 @@ import urllib.error  # Make the urllib.error module available.
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"  # OpenRouter's chat endpoint, used only when Nightshift is absent.
 # Define the Nightshift chat-completions path (OpenAI-compatible, per the flagged assumption).  # Constant: Nightshift chat path.
 NIGHTSHIFT_CHAT_PATH = os.environ.get("NIGHTSHIFT_CHAT_PATH", "/chat/completions")  # Override this one value if the workspace documents a different route.
-# Define the Nemotron model name used on Nightshift.  # Constant: Nightshift model name.
-NIGHTSHIFT_MODEL = os.environ.get("NEMOTRON_MODEL", "nvidia/nemotron-3.5-super-vl")  # The NVIDIA model on the Nightshift side; override without editing code.
+# Define the import-time default Nemotron model name for the Nightshift route.  # Constant: Nightshift model default.
+NIGHTSHIFT_MODEL = os.environ.get("NEMOTRON_MODEL", "nvidia/nemotron-3.5-super-vl")  # Kept for reference; _nightshift_model() re-reads the env live (METERLESS_MODEL first) on every call.
 # Define the Nemotron model slug used on the OpenRouter fallback route.  # Constant: OpenRouter model slug.
 OPENROUTER_MODEL = os.environ.get("NEMOTRON_MODEL_FALLBACK", "nvidia/nemotron-3.5-super-vl:free")  # The verified ARC free-tier seat, fallback only.
 # Define how long (in seconds) a model call may take before we give up.  # Constant: HTTP timeout.
@@ -34,14 +40,22 @@ USER_AGENT = "curl/8.0"  # A plain user agent that API edges accept reliably.
 # Start the exception type raised when the Nemotron call cannot produce an answer.  # Class: NemotronError.
 class NemotronError(Exception):  # Define NemotronError, a plain exception with a message.
     pass  # No extra behavior: it is just a labeled error.
-# Start the getter that reads the Nightshift API URL fresh from the environment.  # Function: _nightshift_url.
+# Start the getter that reads the Nightshift base URL fresh from the environment.  # Function: _nightshift_url.
 def _nightshift_url():  # Define _nightshift_url, which returns the Nightshift base URL each time it is called.
-    # Read the value live so a .env loaded after import still works.  # Why live: env may load after import.
-    return os.environ.get("NIGHTSHIFT_API_URL", "").rstrip("/")  # Empty until the HackOS workspace supplies it.
-# Start the getter that reads the Nightshift API key fresh from the environment.  # Function: _nightshift_key.
-def _nightshift_key():  # Define _nightshift_key, which returns the Nightshift key or an empty string.
-    # Read the value live so a .env loaded after import still works.  # Why live: env may load after import.
-    return os.environ.get("NIGHTSHIFT_API_KEY", "")  # The workspace-issued key: NOT the NVIDIA key, which lives in Nightshift's Providers tab.
+    # Read the DOCUMENTED name first (METERLESS_BASE_URL), then the legacy name, live at call time  # Why live + ordered: env may load after import; documented names win.
+    # so a .env loaded after import still works. Local installs use http://127.0.0.1:8088/v1.  # The documented local default shape.
+    return (os.environ.get("METERLESS_BASE_URL") or os.environ.get("NIGHTSHIFT_API_URL", "")).rstrip("/")  # Empty until a local Nightshift install is configured.
+# Start the getter that reads the Nightshift runtime token fresh from the environment.  # Function: _nightshift_key.
+def _nightshift_key():  # Define _nightshift_key, which returns the runtime token or an empty string.
+    # Read the DOCUMENTED name first (METERLESS_RUNTIME_TOKEN, generated by the local Nightshift  # Why live + ordered: the token is minted by the participant's local app.
+    # app's Console tab), then the legacy NIGHTSHIFT_API_KEY. This is NOT the NVIDIA key, which  # The legacy fallback, and what this value is not.
+    # lives in Nightshift's Providers tab and never enters this codebase.  # The security rule again.
+    return os.environ.get("METERLESS_RUNTIME_TOKEN") or os.environ.get("NIGHTSHIFT_API_KEY", "")  # The local runtime token: the only credential this client ever carries.
+# Start the getter that reads the Nightshift-side model name fresh from the environment.  # Function: _nightshift_model.
+def _nightshift_model():  # Define _nightshift_model, which returns the model string for the Nightshift route.
+    # Read the DOCUMENTED name first (METERLESS_MODEL, default meterless/auto), then NEMOTRON_MODEL,  # Why ordered: documented name wins; the Nemotron name is the DGX-rule pin.
+    # then the built-in Nemotron default - live at call time, like the other getters.  # Live reads keep .env-after-import working.
+    return os.environ.get("METERLESS_MODEL") or os.environ.get("NEMOTRON_MODEL") or "nvidia/nemotron-3.5-super-vl"  # meterless/auto routes server-side; NEMOTRON_MODEL pins an explicit Nemotron build.
 # Start the getter that reads the OpenRouter key fresh from the environment.  # Function: _openrouter_key.
 def _openrouter_key():  # Define _openrouter_key, which returns the OpenRouter key or an empty string.
     # Read the value live so a .env loaded after import still works.  # Why live: env may load after import.
@@ -68,7 +82,7 @@ def get_provider():  # Define get_provider, which returns "nightshift", "openrou
 def get_model():  # Define get_model, which returns the model name for the active route.
     # Match the model name to whichever route get_provider picked.  # Rule: model follows the route.
     if get_provider() == "nightshift":  # Check whether the primary route is active.
-        return NIGHTSHIFT_MODEL  # The Nemotron build on the Nightshift side.
+        return _nightshift_model()  # METERLESS_MODEL if set, else the pinned Nemotron name (live read).
     return OPENROUTER_MODEL  # The OpenRouter free-tier slug otherwise.
 # Start the shared POST helper: send one OpenAI-style chat request and return the reply text.  # Function: _post_chat.
 def _post_chat(url, api_key, model, prompt, system, max_tokens, referer=None):  # Define _post_chat with the endpoint, key, model, and messages.
@@ -114,10 +128,10 @@ def chat(prompt, system=None, max_tokens=1200):  # Define chat with a user promp
     provider = get_provider()  # The active route for this call.
     # Refuse clearly when no route is configured, so callers can fall back.  # Guard: no route.
     if provider is None:  # Neither Nightshift nor OpenRouter has a key.
-        raise NemotronError("No Nemotron route is configured: set NIGHTSHIFT_API_URL + NIGHTSHIFT_API_KEY, or OPENROUTER_API_KEY for the fallback.")  # Tell the caller exactly what is wrong.
+        raise NemotronError("No Nemotron route is configured: set METERLESS_BASE_URL + METERLESS_RUNTIME_TOKEN for a local Nightshift, or OPENROUTER_API_KEY for the fallback.")  # Tell the caller exactly what is wrong.
     # Call the Nightshift chat endpoint when it is the active route.  # Branch: primary route.
     if provider == "nightshift":  # Check whether the primary route is active.
-        return _post_chat(_nightshift_url() + NIGHTSHIFT_CHAT_PATH, _nightshift_key(), NIGHTSHIFT_MODEL, prompt, system, max_tokens)  # NVIDIA serves Nemotron server-side; its key is in the Providers tab.
+        return _post_chat(_nightshift_url() + NIGHTSHIFT_CHAT_PATH, _nightshift_key(), _nightshift_model(), prompt, system, max_tokens)  # NVIDIA serves Nemotron server-side; its key is in the Providers tab.
     # Call OpenRouter when it is the active fallback route.  # Branch: fallback route.
     return _post_chat(OPENROUTER_URL, _openrouter_key(), OPENROUTER_MODEL, prompt, system, max_tokens, referer="https://github.com/dcain2336/quizforge")  # The verified free-tier seat.
 # Backwards-compatible alias: older code called is_configured() for the OpenRouter route.  # Alias note: keeps old callers working.

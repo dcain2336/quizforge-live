@@ -19,6 +19,8 @@ import meterless  # The metering wrapper lives in meterless.py.
 import nemotron  # The Nemotron client lives in nemotron.py (Nightshift first, OpenRouter fallback).
 # Import the Zetaris data layer so the status endpoint can report its configuration state.  # Library: zetaris (this project).
 import zetaris  # The Zetaris harness client lives in zetaris.py.
+# Import the Markovian engine so the status endpoint can report the learner-state configuration.  # Library: markovian (this project).
+import markovian  # The Meterless Markovian Engine port lives in markovian.py.
 # Define the directory this file lives in, so static files resolve from anywhere.  # Constant: project root.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Absolute path of the project folder.
 # Define the path of the single-page UI file.  # Constant: UI file path.
@@ -86,7 +88,7 @@ class QuizForgeLiveHandler(BaseHTTPRequestHandler):  # Define the handler by ext
         # Route /api/status to the integration health panel: Nemotron route, Zetaris, Meterless.  # Branch: status.
         elif self.path == "/api/status":  # Check for the status path.
             # Ask each integration whether it is configured, so the demo can show its working state honestly.  # Step: gather the health.
-            status = {"nemotron_provider": nemotron.get_provider(), "nemotron_model": nemotron.get_model() if nemotron.get_provider() else None, "zetaris_configured": zetaris.is_configured(), "meterless_remote_configured": meterless.is_configured(), "evidence": meterless.log_files()}  # One honest panel for the judges.
+            status = {"nemotron_provider": nemotron.get_provider(), "nemotron_model": nemotron.get_model() if nemotron.get_provider() else None, "zetaris_configured": zetaris.is_configured(), "meterless_remote_configured": meterless.is_configured(), "markovian_engine": {"name": "Meterless Markovian (open source, Apache-2.0)", "upstream": "github.com/Meterless/Meterless engines/markovian", "carryover_budget_tokens": markovian.DEFAULT_CONFIG["carryover_tokens"], "state": "bounded carryover drives plan_round"}, "evidence": meterless.log_files()}  # One honest panel for the judges.
             self.send_json(200, status)  # The integration health snapshot.
         # Anything else is a 404 with a JSON explanation.  # Branch: not found.
         else:  # No route matched.

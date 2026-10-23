@@ -59,7 +59,7 @@ The whole loop runs keyless and offline with zero dependencies (Python standard 
 **Links:**
 
 - Public repo: https://github.com/dcain2336/quizforge-live
-- Demo video (1–4 min): https://www.youtube.com/watch?v=ozvwvb0QFh0 (unlisted, Scott's personal channel @davidcain3710; uploaded Oct 23, 2026; checks clean)
+- Demo video (1–4 min): https://www.youtube.com/watch?v=xWI_GL1Bqn4 (v2 combined film, 2:58 — original demo + Live-tab update; unlisted, Scott's personal channel @davidcain3710; uploaded Oct 23, 2026; checks clean. The v1 film remains at https://www.youtube.com/watch?v=ozvwvb0QFh0 as the original cut.)
 - Slide deck: `quizforge-live-deck.pdf` (11 slides, covering the 8 required points)
 - Run it: `python3 app.py` → http://localhost:8765 (Python 3 standard library only; the full loop works with no API keys — open the "Live study loop" tab to play it)
 - Tests: 30 deterministic offline tests, all passing — `python3 -m unittest discover -s tests`

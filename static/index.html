@@ -1,0 +1,206 @@
+<!DOCTYPE html> <!-- Declare this file as an HTML5 document. -->
+<html lang="en"> <!-- Open the root element and declare English as the page language. -->
+<head> <!-- Open the head section, which holds metadata and styles. -->
+<meta charset="utf-8"> <!-- Declare UTF-8 character encoding so all text renders correctly. -->
+<meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Make the layout adapt to phone and desktop widths. -->
+<title>QuizForge — AI Study Quiz Generator</title> <!-- Set the browser tab title. -->
+<style> /* Open the embedded stylesheet: no external CSS files needed. */
+:root { --ink: #1c2333; --accent: #b3541e; --paper: #faf7f2; --card: #ffffff; --line: #e3ddd2; --good: #1e7a34; --bad: #b3261e; } /* Define the color palette as CSS variables. */
+* { box-sizing: border-box; } /* Make padding count inside element widths everywhere. */
+body { margin: 0; font-family: Georgia, 'Times New Roman', serif; background: var(--paper); color: var(--ink); } /* Base page typography and colors. */
+header { background: var(--ink); color: #f5efe4; padding: 28px 20px 22px; text-align: center; } /* Dark banner across the top. */
+header h1 { margin: 0 0 6px; font-size: 2rem; letter-spacing: 0.04em; } /* Big product name in the banner. */
+header p { margin: 0; opacity: 0.85; font-style: italic; } /* Quiet tagline under the product name. */
+main { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; } /* Center the content column. */
+section { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin-bottom: 20px; } /* Card look for each major block. */
+h2 { margin-top: 0; font-size: 1.25rem; border-bottom: 2px solid var(--accent); padding-bottom: 6px; } /* Section headings with a forge-orange rule. */
+textarea { width: 100%; min-height: 180px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 1rem; } /* Large paste area for study material. */
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; } /* Horizontal control rows that wrap on small screens. */
+button { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 1rem; cursor: pointer; } /* Primary button styling. */
+button.secondary { background: var(--ink); } /* Darker style for secondary actions. */
+button:disabled { opacity: 0.55; cursor: wait; } /* Dim buttons while work is in flight. */
+select, input[type="file"] { font-size: 1rem; } /* Match form control text size to the page. */
+.status { min-height: 1.2em; font-style: italic; } /* Reserved line for progress and error messages. */
+.guide-item { margin: 8px 0; } /* Spacing for study-guide entries. */
+.guide-item strong { color: var(--accent); } /* Highlight the guide's key terms. */
+.question { border-top: 1px dashed var(--line); padding: 14px 0; } /* Separate each quiz question with a dashed rule. */
+.question p { margin: 0 0 8px; font-weight: bold; } /* Bold question stems. */
+.question label { display: block; margin: 4px 0; font-weight: normal; cursor: pointer; } /* One answer option per line, clickable. */
+.question input[type="text"] { width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 6px; font-size: 1rem; } /* Short-answer text field. */
+.verdict { margin-top: 8px; font-weight: bold; } /* The right/wrong line under each graded question. */
+.verdict.good { color: var(--good); } /* Green for correct answers. */
+.verdict.bad { color: var(--bad); } /* Red for missed answers. */
+.explain { font-weight: normal; font-style: italic; display: block; margin-top: 2px; } /* Quieter explanation text under a verdict. */
+.score { font-size: 1.2rem; font-weight: bold; } /* Prominent score line after grading. */
+.hidden { display: none; } /* Utility class that hides blocks until they are needed. */
+footer { text-align: center; opacity: 0.7; padding-bottom: 30px; font-style: italic; } /* Small print at the bottom of the page. */
+</style> <!-- Close the embedded stylesheet. -->
+</head> <!-- Close the head section. -->
+<body> <!-- Open the visible page body. -->
+<header> <!-- Open the banner. -->
+<h1>🔥 QuizForge</h1> <!-- Product name with a forge emoji. -->
+<p>Forge your study material into a quiz — guide, questions, answer key, and a review plan.</p> <!-- One-line description of the app. -->
+</header> <!-- Close the banner. -->
+<main> <!-- Open the main content column. -->
+<section> <!-- Open the input card. -->
+<h2>1 · Your study material</h2> <!-- Step one heading. -->
+<textarea id="material" placeholder="Paste your notes, a textbook section, or any study text here (a few paragraphs minimum)…"></textarea> <!-- Paste area for the study text. -->
+<div class="row"> <!-- Open the control row under the textarea. -->
+<input type="file" id="fileInput" accept=".txt,.md,.text"> <!-- File picker that loads plain-text study files. -->
+<button type="button" class="secondary" id="sampleBtn">Load sample material</button> <!-- Button that fetches the bundled demo text. -->
+<label>Questions: <select id="countSel"> <!-- Label and dropdown for the quiz size. -->
+<option value="6">6</option> <!-- Six-question option. -->
+<option value="8" selected>8</option> <!-- Eight-question option, chosen by default. -->
+<option value="12">12</option> <!-- Twelve-question option. -->
+<option value="16">16</option> <!-- Sixteen-question option. -->
+</select></label> <!-- Close the count label and dropdown. -->
+<button type="button" id="generateBtn">Forge my quiz 🔨</button> <!-- The main generate action. -->
+</div> <!-- Close the control row. -->
+<p class="status" id="status"></p> <!-- Status line for progress and error messages. -->
+</section> <!-- Close the input card. -->
+<section id="guideCard" class="hidden"> <!-- Study-guide card, revealed after generation. -->
+<h2>2 · Study guide</h2> <!-- Step two heading. -->
+<div id="guide"></div> <!-- Container the script fills with guide entries. -->
+</section> <!-- Close the study-guide card. -->
+<section id="quizCard" class="hidden"> <!-- Quiz card, revealed after generation. -->
+<h2>3 · Your quiz</h2> <!-- Step three heading. -->
+<div id="quiz"></div> <!-- Container the script fills with questions. -->
+<div class="row"> <!-- Open the grading control row. -->
+<button type="button" id="checkBtn">Check my answers</button> <!-- Button that grades the quiz. -->
+<button type="button" class="secondary" id="keyBtn">Show answer key</button> <!-- Button that toggles the answer key. -->
+</div> <!-- Close the grading control row. -->
+<p class="score" id="score"></p> <!-- Score line, filled in after grading. -->
+<div id="reviewPlan"></div> <!-- Container for the spaced-repetition review plan. -->
+<div id="answerKey" class="hidden"></div> <!-- Container for the printable answer key. -->
+</section> <!-- Close the quiz card. -->
+</main> <!-- Close the main content column. -->
+<footer>QuizForge — built fresh for the Build With AI: Basics hackathon. Works with a free-tier AI model, and falls back to a built-in offline engine when no key is present.</footer> <!-- Small-print footer. -->
+<script> /* Open the embedded script: all interactivity lives here, no external JS files. */
+"use strict"; // Enable strict mode so silent scripting mistakes become visible errors.
+let currentQuestions = []; // Hold the questions from the most recent generation, for grading.
+let currentGuide = []; // Hold the guide entries from the most recent generation.
+const statusEl = document.getElementById("status"); // Grab the status line element once.
+const materialEl = document.getElementById("material"); // Grab the study-text textarea once.
+document.getElementById("sampleBtn").addEventListener("click", loadSample); // Wire the sample button to its loader.
+document.getElementById("fileInput").addEventListener("change", loadFile); // Wire the file picker to its loader.
+document.getElementById("generateBtn").addEventListener("click", generateQuiz); // Wire the generate button to the generator.
+document.getElementById("checkBtn").addEventListener("click", checkAnswers); // Wire the check button to the grader.
+document.getElementById("keyBtn").addEventListener("click", toggleKey); // Wire the key button to its toggle.
+async function loadSample() { // Define the sample loader: fetch the bundled demo text.
+  statusEl.textContent = "Loading sample material…"; // Tell the user what is happening.
+  const response = await fetch("/sample"); // Ask the server for the demo study text.
+  materialEl.value = await response.text(); // Put the demo text into the textarea.
+  statusEl.textContent = "Sample loaded — a first-responder exam excerpt. Hit “Forge my quiz”."; // Confirm the load and suggest the next step.
+} // Close the sample loader.
+function loadFile(event) { // Define the file loader: read a chosen text file into the textarea.
+  const file = event.target.files[0]; // Take the first (only) chosen file.
+  if (!file) { return; } // If the picker was cancelled, do nothing.
+  const reader = new FileReader(); // Create a reader for the local file.
+  reader.onload = function () { materialEl.value = String(reader.result || ""); }; // When reading finishes, put the text in the textarea.
+  reader.readAsText(file); // Start reading the file as text.
+} // Close the file loader.
+async function generateQuiz() { // Define the generator: send the text to the API and render the result.
+  const text = materialEl.value.trim(); // Read and trim the study material.
+  const count = Number(document.getElementById("countSel").value); // Read the requested question count.
+  const button = document.getElementById("generateBtn"); // Grab the generate button to disable it while working.
+  button.disabled = true; // Prevent double-submits during the request.
+  statusEl.textContent = "Forging your quiz — this can take a few seconds with the AI engine…"; // Set expectations while waiting.
+  try { // Guard the network call so failures show a friendly message.
+    const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: text, count: count }) }); // POST the text and count as JSON.
+    const data = await response.json(); // Parse the JSON reply either way.
+    if (!response.ok) { throw new Error(data.error || "Generation failed."); } // Turn server errors into thrown errors with their message.
+    currentQuestions = data.questions; // Remember the questions for grading.
+    currentGuide = data.guide; // Remember the guide entries.
+    renderGuide(); // Draw the study guide.
+    renderQuiz(); // Draw the quiz form.
+    document.getElementById("score").textContent = ""; // Clear any score from a previous quiz.
+    document.getElementById("reviewPlan").innerHTML = ""; // Clear any previous review plan.
+    document.getElementById("answerKey").classList.add("hidden"); // Hide the answer key again.
+    const engineName = data.source === "heuristic" ? "offline engine (no AI key found)" : "AI engine (" + data.source.replace("llm:", "") + ")"; // Name the engine that actually ran, honestly.
+    statusEl.textContent = "Done — " + currentQuestions.length + " questions forged by the " + engineName + "."; // Report success and which engine produced it.
+  } catch (err) { // Handle any failure from the try block.
+    statusEl.textContent = "⚠️ " + err.message; // Show the error in the status line.
+  } finally { // Always re-enable the button afterwards.
+    button.disabled = false; // Allow another generation run.
+  } // Close the try/catch/finally.
+} // Close the generator.
+function renderGuide() { // Define the guide renderer.
+  const card = document.getElementById("guideCard"); // Grab the guide card element.
+  const box = document.getElementById("guide"); // Grab the guide container.
+  if (!currentGuide.length) { card.classList.add("hidden"); return; } // If there is no guide, keep the card hidden.
+  card.classList.remove("hidden"); // Reveal the guide card.
+  box.innerHTML = currentGuide.map(function (entry) { return "<p class='guide-item'><strong>" + escapeHtml(entry.term) + "</strong> — " + escapeHtml(entry.point) + "</p>"; }).join(""); // Build one line per guide entry, escaping user text.
+} // Close the guide renderer.
+function renderQuiz() { // Define the quiz renderer.
+  const card = document.getElementById("quizCard"); // Grab the quiz card element.
+  const box = document.getElementById("quiz"); // Grab the quiz container.
+  card.classList.remove("hidden"); // Reveal the quiz card.
+  box.innerHTML = currentQuestions.map(function (q, i) { return questionHtml(q, i); }).join(""); // Build the HTML for every question.
+  card.scrollIntoView({ behavior: "smooth" }); // Bring the quiz into view for the user.
+} // Close the quiz renderer.
+function questionHtml(q, i) { // Define the per-question HTML builder.
+  let html = "<div class='question' id='question-" + i + "'><p>Q" + (i + 1) + ". " + escapeHtml(q.question) + "</p>"; // Open the question block with its numbered stem.
+  if (q.type === "mcq") { // Multiple-choice questions render as radio options.
+    html += q.options.map(function (opt, j) { return "<label><input type='radio' name='q" + i + "' value='" + j + "'> " + escapeHtml(opt) + "</label>"; }).join(""); // One labelled radio per option.
+  } else { // Short-answer questions render as a text field.
+    html += "<input type='text' id='short-" + i + "' placeholder='Type your answer…'>"; // A single-line answer box.
+  } // Close the type branch.
+  html += "<div class='verdict' id='verdict-" + i + "'></div></div>"; // Add an empty verdict slot, then close the question block.
+  return html; // Hand the HTML back to the renderer.
+} // Close the per-question builder.
+function checkAnswers() { // Define the grader: score the quiz, explain misses, build the review plan.
+  let correct = 0; // Count the questions answered correctly.
+  const missedTopics = []; // Collect the topics of missed questions for the review plan.
+  currentQuestions.forEach(function (q, i) { // Walk every question with its index.
+    const verdict = document.getElementById("verdict-" + i); // Grab this question's verdict slot.
+    let isRight = false; // Assume wrong until proven right.
+    if (q.type === "mcq") { // Grade multiple-choice by the chosen radio.
+      const chosen = document.querySelector("input[name='q" + i + "']:checked"); // Find the selected option, if any.
+      isRight = chosen !== null && Number(chosen.value) === q.answer_index; // Right means the chosen index matches the key.
+    } else { // Grade short answers with a forgiving text comparison.
+      const given = document.getElementById("short-" + i).value.trim().toLowerCase(); // Read the typed answer, normalized.
+      const expected = q.answer.trim().toLowerCase(); // Normalize the expected answer the same way.
+      isRight = given.length > 0 && (given === expected || given.includes(expected) || expected.includes(given)); // Accept exact or containing matches.
+    } // Close the grading branch.
+    if (isRight) { correct += 1; } // Add to the score when correct.
+    if (!isRight && !missedTopics.includes(q.topic)) { missedTopics.push(q.topic); } // Remember each missed topic once.
+    verdict.className = "verdict " + (isRight ? "good" : "bad"); // Color the verdict by the result.
+    verdict.innerHTML = (isRight ? "✅ Correct." : "❌ Not quite — answer: " + escapeHtml(q.answer) + ".") + "<span class='explain'>" + escapeHtml(q.explanation || "") + "</span>"; // Show the verdict plus the explanation.
+  }); // Close the per-question grading loop.
+  document.getElementById("score").textContent = "Score: " + correct + " / " + currentQuestions.length; // Show the total score.
+  renderReviewPlan(missedTopics); // Build the spaced-repetition plan from the misses.
+  renderAnswerKey(); // Refresh the answer key block.
+} // Close the grader.
+function renderReviewPlan(missedTopics) { // Define the review-plan renderer: spaced repetition for missed topics.
+  const box = document.getElementById("reviewPlan"); // Grab the review-plan container.
+  if (!missedTopics.length) { box.innerHTML = "<p>🎉 Perfect score — no review plan needed. Forge a harder quiz next!</p>"; return; } // Celebrate a clean sweep and stop.
+  const days = [1, 3, 7]; // The classic spaced-repetition intervals, in days.
+  let html = "<h3>Your spaced-repetition review plan</h3><p>Revisit these missed topics:</p><ul>"; // Open the plan with its heading.
+  missedTopics.forEach(function (topic) { // Walk each missed topic.
+    const dates = days.map(function (d) { const when = new Date(); when.setDate(when.getDate() + d); return when.toLocaleDateString(); }).join(", "); // Compute the three review dates for this topic.
+    html += "<li><strong>" + escapeHtml(topic) + "</strong> — review on " + dates + "</li>"; // Add one plan line per topic.
+  }); // Close the topic loop.
+  html += "</ul>"; // Close the plan list.
+  box.innerHTML = html; // Put the plan on the page.
+} // Close the review-plan renderer.
+function renderAnswerKey() { // Define the answer-key renderer.
+  const box = document.getElementById("answerKey"); // Grab the answer-key container.
+  let html = "<h3>Answer key</h3><ol>"; // Open the key with its heading and a numbered list.
+  currentQuestions.forEach(function (q) { html += "<li>" + escapeHtml(q.answer) + " <em>(" + escapeHtml(q.topic) + ")</em></li>"; }); // One key line per question, with its topic.
+  html += "</ol>"; // Close the key list.
+  box.innerHTML = html; // Put the key on the page (visibility is toggled separately).
+} // Close the answer-key renderer.
+function toggleKey() { // Define the answer-key toggle.
+  renderAnswerKey(); // Make sure the key content is current.
+  const box = document.getElementById("answerKey"); // Grab the answer-key container.
+  box.classList.toggle("hidden"); // Flip its visibility.
+  document.getElementById("keyBtn").textContent = box.classList.contains("hidden") ? "Show answer key" : "Hide answer key"; // Update the button label to match.
+} // Close the answer-key toggle.
+function escapeHtml(text) { // Define a tiny HTML escaper so user text can never break the page.
+  const div = document.createElement("div"); // Create a scratch element.
+  div.textContent = String(text); // Assign the text as pure text, which encodes special characters.
+  return div.innerHTML; // Read back the safely encoded HTML.
+} // Close the escaper.
+</script> <!-- Close the embedded script. -->
+</body> <!-- Close the visible page body. -->
+</html> <!-- Close the root element. -->

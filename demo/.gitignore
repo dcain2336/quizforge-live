@@ -3,3 +3,4 @@ clips/
 audio/
 # Local capture server log - runtime scratch, not an asset.
 server.log
+server_addendum.log

@@ -1,0 +1,4 @@
+[add01] (shot09_live_setup.png) Update — the loop now runs live in the browser. This is the new Live tab: same app, same offline engine, and the banner says exactly that. No keys, nothing hidden.
+[add02] (shot10_live_round1.png) Round one, planned right on the page by the Meterless Markovian engine — focus, difficulty, strategy — with the bounded learner state underneath: sixty-one tokens of carryover. Four questions, dealt in the browser.
+[add03] (shot11_live_grade.png) I answer in the browser and deliberately miss Airway and O P Q R S T. Instant grade — two of four — every miss quoting the study material back at me, the missed topics pinned as pills.
+[add04] (shot12_live_round2.png) One click plans round two — and its focus lands on exactly those two misses. The state reads: completed, A V P U and M O I; remaining, Airway and O P Q R S T. Sixty-eight tokens. The loop now happens where the learner sits: in the browser.

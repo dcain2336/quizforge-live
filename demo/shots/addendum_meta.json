@@ -1,0 +1,47 @@
+{
+  "round1_plan": {
+    "focus_areas": [
+      "First Aid"
+    ],
+    "difficulty": "easy",
+    "strategy": "First round; baseline probe of the session topic. Difficulty easy.",
+    "engine": "markovian",
+    "state": "COMPLETED: none yet\nREMAINING: none\nDECISIONS: First round; baseline probe of the session topic. Difficulty easy.\nCONTEXT: Session topic: First Aid. Attempts: 0 (0 correct, 0 missed). Engine: Meterless Markovian, carryover budget 800 tokens.",
+    "state_level": "marker",
+    "carryover_tokens": 61
+  },
+  "round1_source": "heuristic",
+  "question_topics": [
+    "Airway",
+    "OPQRST",
+    "AVPU",
+    "MOI"
+  ],
+  "targets_missed": [
+    "Airway",
+    "OPQRST"
+  ],
+  "grade_score": 2,
+  "grade_total": 4,
+  "missed_topics": [
+    "Airway",
+    "OPQRST"
+  ],
+  "round2_focus": [
+    "Airway",
+    "OPQRST"
+  ],
+  "round2_plan": {
+    "focus_areas": [
+      "Airway",
+      "OPQRST"
+    ],
+    "difficulty": "easy",
+    "strategy": "Revisit weak topics first: Airway, OPQRST. Difficulty easy per the Markov state rule.",
+    "engine": "markovian",
+    "state": "COMPLETED: AVPU, MOI\nREMAINING: Airway, OPQRST\nDECISIONS: Revisit weak topics first: Airway, OPQRST. Difficulty easy per the Markov state rule.\nCONTEXT: Session topic: First Aid. Attempts: 4 (2 correct, 2 missed). Engine: Meterless Markovian, carryover budget 800 tokens.",
+    "state_level": "marker",
+    "carryover_tokens": 68
+  },
+  "focus_matches_missed": true
+}

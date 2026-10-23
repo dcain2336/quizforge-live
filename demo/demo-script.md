@@ -33,3 +33,27 @@ Narration ≈ 295 words ≈ 1:58 of speech at ~150 wpm, plus 0.7 s of padding pe
 → ≈ 2:05 total. If capture shows different missed topics than AVPU/OPQRST, beat 5's
 narration is re-voiced with the captured topics before assembly — the video never
 names a topic the capture did not produce.
+
+---
+
+## Addendum (Stage 3d, 2026-10-23) — combined v2 film
+
+**Deliverable:** `quizforge-live-demo-v2.mp4` — the film above (2:02) + a 2.6 s title card
+("Update: the loop, live in the browser") + the Live-tab addendum below = **2:58 total**
+(1280×720, H.264 + AAC, ffprobe-verified, frame-checked at every seam).
+**Method:** `capture_addendum.py` runs the real `app.py` with the same scrubbed environment and
+drives the shipped UI itself — Live tab, sample button, radio inputs, grade and next-round
+buttons; the /api/round and /api/grade payloads were intercepted read-only to verify the
+narration (`shots/addendum_meta.json`, `focus_matches_missed: true`). Assembled by
+`assemble_v2.py` with the same recipe as `assemble.py`; narration in `narration_addendum.txt`.
+**Session filmed:** round 1 topics Airway, OPQRST, AVPU, MOI; deliberate misses Airway + OPQRST;
+grade **2/4**; round 2 focus `["Airway", "OPQRST"]`, state COMPLETED: AVPU, MOI /
+REMAINING: Airway, OPQRST, 68 carryover tokens.
+
+| # | Time (in v2) | Shot | On screen | Narration |
+|---|--------------|------|-----------|-----------|
+| C | 2:02–2:05 | card_update.png | Title card (ink background) | — (silent) |
+| A1 | 2:05–2:17 | shot09_live_setup.png | Live tab: honesty banner, sample loaded, 4-question round set | "Update — the loop now runs live in the browser. This is the new Live tab: same app, same offline engine, and the banner says exactly that. No keys, nothing hidden." |
+| A2 | 2:17–2:28 | shot10_live_round1.png | Round 1 in the browser: plan, 61-token state, questions | "Round one, planned right on the page by the Meterless Markovian engine — focus, difficulty, strategy — with the bounded learner state underneath: sixty-one tokens of carryover. Four questions, dealt in the browser." |
+| A3 | 2:28–2:41 | shot11_live_grade.png | Results card: 2/4, cited explanations, missed pills | "I answer in the browser and deliberately miss Airway and O P Q R S T. Instant grade — two of four — every miss quoting the study material back at me, the missed topics pinned as pills." |
+| A4 | 2:41–2:58 | shot12_live_round2.png | Round 2 plan: focus pills = the misses, state on screen | "One click plans round two — and its focus lands on exactly those two misses. The state reads: completed, A V P U and M O I; remaining, Airway and O P Q R S T. Sixty-eight tokens. The loop now happens where the learner sits: in the browser." |

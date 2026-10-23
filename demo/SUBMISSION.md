@@ -1,23 +1,25 @@
-# QuizForge Live — submission pack (Stage 3b, 2026-10-23)
+# QuizForge Live — submission pack (Stage 3b, refreshed in Stage 3d, 2026-10-23)
 
 > **FILE-LOCAL NOTES — not part of the submission text (delete before pasting anywhere):**
 >
 > - **Pivot trigger:** if Zetaris is still TBC at **Sun Oct 25, 12:00 EDT**, reconsider the primary track
 >   (Track 02 — AI Agents for Operations & Enterprise Workflows — per PLATFORM-NOTES.md). Roster locks when
 >   the first submission is created, so decide before submitting. Deadline: **Tue Oct 27, 19:45 EDT**.
-> - **Assets:** demo video `demo/quizforge-live-demo.mp4` (2:02, 720p, verified) — upload to Scott's
->   **personal** YouTube channel, unlisted (his standing rule for contest videos), then paste the link below.
->   Deck: `demo/quizforge-live-deck.pdf` (11 slides). Repo: https://github.com/dcain2336/quizforge-live — the
->   Stage 3b assets commit is local only; **push before submitting** so the public repo matches.
+> - **Assets:** demo video `demo/quizforge-live-demo-v2.mp4` — the Stage 3b film (2:02) plus a Stage 3d
+>   Live-tab addendum behind a title card (combined, under 3:30, 720p, verified). **Parent: upload v2 to
+>   Scott's personal YouTube channel, unlisted (his standing rule for contest videos), and replace the
+>   YouTube link in the Links section below — it currently points at the v1 (Stage 3b) upload.**
+>   Deck: `demo/quizforge-live-deck.pdf` (11 slides; future-enhancements slide and test counts corrected
+>   in Stage 3d). Repo: https://github.com/dcain2336/quizforge-live — the Stage 3b/3c/3d commits are
+>   local only; **push before submitting** so the public repo matches.
 > - **Pre-existing-components wording:** the organizers ask for a declaration of components built before
 >   Oct 22 00:00 UTC. Workspace records show QuizForge v1 was built Oct 22–23, 2026 and submitted to
 >   Build With AI on Oct 23 — so the declaration below states v1's origin and dates factually rather than
 >   asserting it predates the Oct 22 boundary. Adjust at submit time if the form's exact wording demands it.
-> - **Known product gap (not in the submission text):** the shipped web UI is still the v1 shell
->   (`/api/generate` one-shot flow). The Live loop is fully implemented at the API level
->   (`/api/round`, `/api/grade`, `/api/usage`, `/api/status`) and is what the demo films; a browser
->   "Live" tab wired to those endpoints is listed in the deck's future enhancements. If time allows
->   before Oct 27, wiring that tab is the highest-value remaining product work (Product & UX points).
+> - **Stage 3c/3d status:** the browser "Live" tab shipped in Stage 3c (the loop now plays in the UI
+>   against the same `/api/round`, `/api/grade`, `/api/usage`, `/api/status` endpoints); Stage 3d
+>   corrected this pack and the deck accordingly and appended a Live-tab addendum to the demo film.
+>   No known product gap remains in the package.
 
 ---
 
@@ -33,11 +35,11 @@
 
 **Description:**
 
-QuizForge Live turns any pasted study material into a live study agent. Where a quiz generator forges one quiz and stops, QuizForge Live runs a loop — PLAN → GENERATE → GRADE → ADAPT — round after round, until the learner has mastered the material.
+QuizForge Live turns any pasted study material into a live study agent you play in the browser. Where a quiz generator forges one quiz and stops, QuizForge Live's Live tab runs a loop — PLAN → GENERATE → GRADE → ADAPT — round after round, until the learner has mastered the material.
 
 Each plan is decided from a small, bounded learner state carried by the Meterless Markovian engine: which topics are completed, which remain (the weak ones), the current strategy, and the difficulty — compressed to an 800-token budget and never the raw history, so planning cost stays constant no matter how long the learner studies. Questions are generated from the learner's own material; grading is instant, and every miss returns an explanation that cites the study source it came from. Missed topics are folded back into the state and resurface as the next round's focus until they are mastered.
 
-In the filmed demo (a first-responder exam excerpt, run fully offline), round 1 is an easy baseline probe of four questions; the learner deliberately misses every question on two topics and scores 1/4. Round 2's plan — decided by the engine from a 69-token state — targets exactly those two topics, SAMPLE and DCAP-BTLS. Every step leaves evidence: plan traces and grade telemetry in a JSONL log, metered model calls, and `/api/usage` + `/api/status` endpoints that report exactly what the agent did and which integrations are live.
+In the filmed demo (a first-responder exam excerpt, run fully offline), round 1 is an easy baseline probe of four questions; the learner deliberately misses every question on two topics and scores 1/4. Round 2's plan — decided by the engine from a 69-token state — targets exactly those two topics, SAMPLE and DCAP-BTLS. An update appended to the film shows the same session played in the browser's Live tab: the plan and the bounded Markovian state on screen, the answers graded in place, and the round-2 plan landing on exactly the missed topics. Every step leaves evidence: plan traces and grade telemetry in a JSONL log, metered model calls, and `/api/usage` + `/api/status` endpoints that report exactly what the agent did and which integrations are live.
 
 The whole loop runs keyless and offline with zero dependencies (Python standard library only), so anyone can reproduce it; model routes enrich planning and explanations when configured.
 
@@ -52,13 +54,13 @@ The whole loop runs keyless and offline with zero dependencies (Python standard 
 **Declaration of pre-existing components:**
 
 - **QuizForge v1** — the question-generation engine (`generator.py`) and the static web UI — was built for the **Build With AI: Basics** hackathon and submitted there on **Oct 23, 2026** (Devpost: quizforge-ki0zgj; repo: github.com/dcain2336/quizforge). It is declared here as the pre-existing base of this Wildcard entry.
-- **New work in this event:** the Live agent loop (`agent.py`), the Meterless Markovian engine port (`markovian.py`), the Zetaris REST layer (`zetaris.py`), the Nightshift-first model routing (`nemotron.py`), the evidence-cited explanations (`explain.py`), and the JSONL evidence system (`meterless.py`, `logs/`), plus the demo film and this deck.
+- **New work in this event:** the Live agent loop (`agent.py`), the browser Live tab that plays the loop in the UI (the Stage 3c pane in `static/index.html`), the Meterless Markovian engine port (`markovian.py`), the Zetaris REST layer (`zetaris.py`), the Nightshift-first model routing (`nemotron.py`), the evidence-cited explanations (`explain.py`), and the JSONL evidence system (`meterless.py`, `logs/`), plus the demo film and this deck.
 
 **Links:**
 
 - Public repo: https://github.com/dcain2336/quizforge-live
 - Demo video (1–4 min): https://www.youtube.com/watch?v=ozvwvb0QFh0 (unlisted, Scott's personal channel @davidcain3710; uploaded Oct 23, 2026; checks clean)
 - Slide deck: `quizforge-live-deck.pdf` (11 slides, covering the 8 required points)
-- Run it: `python3 app.py` → http://localhost:8765 (Python 3 standard library only; the full loop works with no API keys)
-- Tests: 27 deterministic offline tests, all passing — `python3 -m unittest discover -s tests`
+- Run it: `python3 app.py` → http://localhost:8765 (Python 3 standard library only; the full loop works with no API keys — open the "Live study loop" tab to play it)
+- Tests: 30 deterministic offline tests, all passing — `python3 -m unittest discover -s tests`
 - License: MIT. The Markovian engine port is Apache-2.0 (Meterless), attributed in `markovian.py`.

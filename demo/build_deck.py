@@ -50,7 +50,7 @@ SLIDES = [  # One HTML string per slide.
 <div class="kicker">GenAI Works Open Agent Hackathon 2026 · Wildcard [Tinkerer]</div>
 <h1>QuizForge Live</h1>
 <p class="sub">The study agent that remembers what you missed.<br>Paste any study material — it plans a round, generates the questions, grades your answers, and adapts what comes next.</p>
-<div class="meta">David Scott Cain · solo · Team HackOS<br>Built on QuizForge (v1, Build With AI: Basics, submitted Oct 23, 2026) — all Live work is new in this event window.<br>Demo video: 2 minutes · Repo: github.com/dcain2336/quizforge-live</div>
+<div class="meta">David Scott Cain · solo · Team HackOS<br>Built on QuizForge (v1, Build With AI: Basics, submitted Oct 23, 2026) — all Live work is new in this event window.<br>Demo video: 2:58 (film + browser Live-tab update) · Repo: github.com/dcain2336/quizforge-live</div>
 </section>""",  # End of the title slide.
     # Slide 1: required point 1 - the problem and who it is for.  # Slide: point 1.
     """<section class="slide">
@@ -99,7 +99,7 @@ SLIDES = [  # One HTML string per slide.
 <li><strong>Modules:</strong> <code>app.py</code> (HTTP API) · <code>agent.py</code> (the loop) · <code>markovian.py</code> (Meterless engine port) · <code>generator.py</code> (v1 engine) · <code>nemotron.py</code> (model routes) · <code>explain.py</code> (cited explanations) · <code>zetaris.py</code> (data-harness client) · <code>meterless.py</code> (JSONL evidence).</li>
 <li><strong>Models:</strong> NVIDIA Nemotron (<code>nvidia/nemotron-3.5-super-vl:free</code>) via Nightshift locally or OpenRouter's free tier.</li>
 <li><strong>Data layer:</strong> Zetaris REST — Bearer + X-Org-ID + X-Request-ID, SQL via <code>POST /sql-editor/sqls/run</code>.</li>
-<li><strong>Tests:</strong> 27 deterministic offline tests (engine bounds, compression cascade, behavior change, env routing, full loop) — <code>python3 -m unittest discover -s tests</code>.</li>
+<li><strong>Tests:</strong> 30 deterministic offline tests (engine bounds, compression cascade, behavior change, env routing, full loop, and HTTP-level UI tests) — <code>python3 -m unittest discover -s tests</code>.</li>
 </ul>
 </section>""",  # End of point 4.
     # Slide 5: required point 5 - how Zetaris and Meterless were used, stated honestly.  # Slide: point 5.
@@ -150,7 +150,7 @@ SLIDES = [  # One HTML string per slide.
 <li><strong>Nightshift on the participant's machine</strong> (or a DGX Spark): local Nemotron planning through the already-built route; model checkpoints already parsed and kept as evidence.</li>
 <li><strong>More Meterless engines:</strong> H-MEM for cross-session learner memory; Scout Intent to route across a multi-subject study library.</li>
 <li><strong>Spaced repetition from the state:</strong> schedule reviews straight off the REMAINING list (v1's review plan meets the Markovian state), plus cohort/class mode and Anki export.</li>
-<li><strong>A Live tab in the UI</strong> that plays rounds in the browser against the same API the demo films.</li>
+<li><strong>Hosted deployment:</strong> a public demo instance, so anyone can play a round without cloning the repo — the zero-dependency app deploys as-is — plus persistent sessions, so a learner's Markovian state survives across visits.</li>
 </ul>
 </section>""",  # End of point 8.
     # Slide 10: the closing slide - run instructions, repo, license.  # Slide: closing.
@@ -158,7 +158,7 @@ SLIDES = [  # One HTML string per slide.
 <div class="kicker">QuizForge Live</div>
 <h2>Plan · Generate · Grade · Adapt</h2>
 <p class="big">Run it: <code>python3 app.py</code> → http://localhost:8765 — the whole loop works with no keys at all.</p>
-<p class="big" style="margin-top:18px;">Repo: github.com/dcain2336/quizforge-live · Tests: 27 offline, all passing · License: MIT</p>
+<p class="big" style="margin-top:18px;">Repo: github.com/dcain2336/quizforge-live · Tests: 30 offline, all passing · License: MIT</p>
 <div class="meta">GenAI Works Open Agent Hackathon 2026 · Wildcard [Tinkerer] · David Scott Cain (solo, team HackOS)<br>Pre-existing base: QuizForge v1 (declared). New in this event: the agent loop, the Markovian engine port, the Zetaris REST layer, the Nightshift route, and the JSONL evidence trail.</div>
 </section>""",  # End of the closing slide.
 ]  # End of the slide list.

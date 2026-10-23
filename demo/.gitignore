@@ -1,0 +1,5 @@
+# Build intermediates for the demo film - regenerable via assemble.py, kept out of the repo.
+clips/
+audio/
+# Local capture server log - runtime scratch, not an asset.
+server.log

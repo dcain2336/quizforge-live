@@ -1,0 +1,97 @@
+QUIZFORGE LIVE - LIVE CAPTURE TRANSCRIPT
+Step 5 - POST /api/round (round 2: same material, history = round 1's graded results)
+The plan block below is the money shot: its focus list must equal round 1's missed topics
+----------------------------------------------------------------------------------------------------
+{
+  "source": "heuristic",
+  "guide": [
+    {
+      "term": "MOI",
+      "point": "Mechanism of injury (MOI) and nature of illness (NOI) are different tools: trauma patients get an MOI, medical patients get an NOI."
+    },
+    {
+      "term": "NOI",
+      "point": "Mechanism of injury (MOI) and nature of illness (NOI) are different tools: trauma patients get an MOI, medical patients get an NOI."
+    },
+    {
+      "term": "AVPU",
+      "point": "Key Mnemonics: Patient Assessment AVPU is a rapid check of level of consciousness."
+    },
+    {
+      "term": "SAMPLE",
+      "point": "SAMPLE stands for Signs and symptoms, Allergies, Medications, Past medical history, Last oral intake, and Events leading up to the incident."
+    },
+    {
+      "term": "OPQRST",
+      "point": "OPQRST stands for Onset, Provokes, Quality, Radiates, Severity, and Time."
+    },
+    {
+      "term": "DCAP-BTLS",
+      "point": "DCAP-BTLS is used during a rapid trauma exam."
+    },
+    {
+      "term": "Airway",
+      "point": "Airway, Breathing & Circulation The airway priority order starts with manual maneuvers: head tilt-chin lift when there is no trauma, or jaw thrust when trauma is suspected."
+    }
+  ],
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "Which term best completes this statement from the study material? \"_____ stands for Alert, Verbal, Painful, Unresponsive.\"",
+      "options": [
+        "OPQRST",
+        "DCAP-BTLS",
+        "AVPU",
+        "MOI"
+      ],
+      "answer_index": 2,
+      "answer": "AVPU",
+      "topic": "AVPU",
+      "explanation": "Full statement: AVPU stands for Alert, Verbal, Painful, Unresponsive."
+    },
+    {
+      "type": "mcq",
+      "question": "Which term best completes this statement from the study material? \"_____, Breathing & Circulation The airway priority order starts with manual maneuvers: head tilt-chin lift when there is no trauma, or jaw thrust when trauma is suspected.\"",
+      "options": [
+        "Airway",
+        "MOI",
+        "DCAP-BTLS",
+        "SAMPLE"
+      ],
+      "answer_index": 0,
+      "answer": "Airway",
+      "topic": "Airway",
+      "explanation": "Full statement: Airway, Breathing & Circulation The airway priority order starts with manual maneuvers: head tilt-chin lift when there is no trauma, or jaw thrust when trauma is suspected."
+    },
+    {
+      "type": "short",
+      "question": "Fill in the blank: \"_____ stands for Signs and symptoms, Allergies, Medications, Past medical history, Last oral intake, and Events leading up to the incident.\"",
+      "options": [],
+      "answer_index": -1,
+      "answer": "SAMPLE",
+      "topic": "SAMPLE",
+      "explanation": "Full statement: SAMPLE stands for Signs and symptoms, Allergies, Medications, Past medical history, Last oral intake, and Events leading up to the incident."
+    },
+    {
+      "type": "short",
+      "question": "Fill in the blank: \"_____ is used during a rapid trauma exam.\"",
+      "options": [],
+      "answer_index": -1,
+      "answer": "DCAP-BTLS",
+      "topic": "DCAP-BTLS",
+      "explanation": "Full statement: DCAP-BTLS is used during a rapid trauma exam."
+    }
+  ],
+  "plan": {
+    "focus_areas": [
+      "DCAP-BTLS",
+      "SAMPLE"
+    ],
+    "difficulty": "easy",
+    "strategy": "Revisit weak topics first: DCAP-BTLS, SAMPLE. Difficulty easy per the Markov state rule.",
+    "engine": "markovian",
+    "state": "COMPLETED: Airway\nREMAINING: DCAP-BTLS, SAMPLE\nDECISIONS: Revisit weak topics first: DCAP-BTLS, SAMPLE. Difficulty easy per the Markov state rule.\nCONTEXT: Session topic: First Aid. Attempts: 4 (1 correct, 3 missed). Engine: Meterless Markovian, carryover budget 800 tokens.",
+    "state_level": "marker",
+    "carryover_tokens": 69
+  }
+}

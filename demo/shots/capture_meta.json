@@ -1,0 +1,96 @@
+{
+  "round1_plan": {
+    "focus_areas": [
+      "First Aid"
+    ],
+    "difficulty": "easy",
+    "strategy": "First round; baseline probe of the session topic. Difficulty easy.",
+    "engine": "markovian",
+    "state": "COMPLETED: none yet\nREMAINING: none\nDECISIONS: First round; baseline probe of the session topic. Difficulty easy.\nCONTEXT: Session topic: First Aid. Attempts: 0 (0 correct, 0 missed). Engine: Meterless Markovian, carryover budget 800 tokens.",
+    "state_level": "marker",
+    "carryover_tokens": 61
+  },
+  "round1_source": "heuristic",
+  "question_topics": [
+    "SAMPLE",
+    "DCAP-BTLS",
+    "DCAP-BTLS",
+    "Airway"
+  ],
+  "targets_missed": [
+    "SAMPLE",
+    "DCAP-BTLS"
+  ],
+  "answers_given": [
+    "AVPU",
+    "Airway",
+    "I don't know",
+    "Airway"
+  ],
+  "grade_score": 1,
+  "grade_total": 4,
+  "missed_topics": [
+    "DCAP-BTLS",
+    "SAMPLE"
+  ],
+  "round2_focus": [
+    "DCAP-BTLS",
+    "SAMPLE"
+  ],
+  "round2_plan": {
+    "focus_areas": [
+      "DCAP-BTLS",
+      "SAMPLE"
+    ],
+    "difficulty": "easy",
+    "strategy": "Revisit weak topics first: DCAP-BTLS, SAMPLE. Difficulty easy per the Markov state rule.",
+    "engine": "markovian",
+    "state": "COMPLETED: Airway\nREMAINING: DCAP-BTLS, SAMPLE\nDECISIONS: Revisit weak topics first: DCAP-BTLS, SAMPLE. Difficulty easy per the Markov state rule.\nCONTEXT: Session topic: First Aid. Attempts: 4 (1 correct, 3 missed). Engine: Meterless Markovian, carryover budget 800 tokens.",
+    "state_level": "marker",
+    "carryover_tokens": 69
+  },
+  "focus_matches_missed": true,
+  "usage": {
+    "usage": {},
+    "evidence": [
+      {
+        "path": "/home/hatch/workspace/goals/hackathon-entry-campaign/files/genai-works-open-agent/quizforge-live/logs/model_calls.jsonl",
+        "exists": false,
+        "events": 0,
+        "bytes": 0
+      },
+      {
+        "path": "/home/hatch/workspace/goals/hackathon-entry-campaign/files/genai-works-open-agent/quizforge-live/logs/events.jsonl",
+        "exists": true,
+        "events": 3,
+        "bytes": 1218
+      }
+    ]
+  },
+  "status": {
+    "nemotron_provider": null,
+    "nemotron_model": null,
+    "zetaris_configured": false,
+    "meterless_remote_configured": false,
+    "markovian_engine": {
+      "name": "Meterless Markovian (open source, Apache-2.0)",
+      "upstream": "github.com/Meterless/Meterless engines/markovian",
+      "carryover_budget_tokens": 800,
+      "state": "bounded carryover drives plan_round"
+    },
+    "evidence": [
+      {
+        "path": "/home/hatch/workspace/goals/hackathon-entry-campaign/files/genai-works-open-agent/quizforge-live/logs/model_calls.jsonl",
+        "exists": false,
+        "events": 0,
+        "bytes": 0
+      },
+      {
+        "path": "/home/hatch/workspace/goals/hackathon-entry-campaign/files/genai-works-open-agent/quizforge-live/logs/events.jsonl",
+        "exists": true,
+        "events": 3,
+        "bytes": 1218
+      }
+    ]
+  }
+}

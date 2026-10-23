@@ -1,0 +1,1 @@
+{"usage": {}, "evidence": [{"path": "/home/hatch/workspace/goals/hackathon-entry-campaign/files/genai-works-open-agent/quizforge-live/logs/model_calls.jsonl", "exists": false, "events": 0, "bytes": 0}, {"path": "/home/hatch/workspace/goals/hackathon-entry-campaign/files/genai-works-open-agent/quizforge-live/logs/events.jsonl", "exists": true, "events": 3, "bytes": 1218}]}

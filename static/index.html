@@ -33,6 +33,20 @@ select, input[type="file"] { font-size: 1rem; } /* Match form control text size 
 .explain { font-weight: normal; font-style: italic; display: block; margin-top: 2px; } /* Quieter explanation text under a verdict. */
 .score { font-size: 1.2rem; font-weight: bold; } /* Prominent score line after grading. */
 .hidden { display: none; } /* Utility class that hides blocks until they are needed. */
+.tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; } /* Tab bar above the panes (Stage 3c). */
+button.tabbtn { background: var(--card); color: var(--ink); border: 1px solid var(--line); } /* Inactive tab: quiet card look. */
+button.tabbtn.active { background: var(--ink); color: #f5efe4; } /* Active tab: dark like the banner. */
+.mode { background: #f7f1e6; border: 1px dashed var(--accent); border-radius: 8px; padding: 10px 12px; font-style: italic; margin-bottom: 12px; } /* Honesty banner naming the active engine route. */
+.pill { display: inline-block; background: #f3e9dc; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; margin: 2px 4px 2px 0; font-size: 0.9rem; } /* Small rounded label chip. */
+.pill.focus { background: var(--accent); color: #fff; border-color: var(--accent); } /* Focus-area chips wear the forge orange. */
+.pill.diff { background: var(--ink); color: #f5efe4; } /* Difficulty chip wears the banner ink. */
+.planline { margin: 6px 0; } /* One plan fact per line. */
+.staterow { margin: 6px 0; } /* One learner-state field per line. */
+.staterow strong { color: var(--accent); } /* State field labels in forge orange. */
+.statebox { background: var(--ink); color: #e8f0e4; border-radius: 8px; padding: 12px 14px; font-family: 'Courier New', monospace; font-size: 0.92rem; white-space: pre-wrap; word-break: break-word; } /* The raw bounded state block, verbatim. */
+.qtopic { display: inline-block; font-size: 0.8rem; background: #efe9dd; border-radius: 4px; padding: 1px 6px; margin-left: 8px; font-weight: normal; } /* Per-question topic tag. */
+details summary { cursor: pointer; font-style: italic; margin-top: 8px; } /* Collapsible raw-state toggle. */
+input[type="text"].topicin { padding: 8px; border: 1px solid var(--line); border-radius: 6px; font-size: 1rem; } /* Topic text field in the Live setup row. */
 footer { text-align: center; opacity: 0.7; padding-bottom: 30px; font-style: italic; } /* Small print at the bottom of the page. */
 </style> <!-- Close the embedded stylesheet. -->
 </head> <!-- Close the head section. -->
@@ -42,6 +56,11 @@ footer { text-align: center; opacity: 0.7; padding-bottom: 30px; font-style: ita
 <p>Forge your study material into a quiz — guide, questions, answer key, and a review plan.</p> <!-- One-line description of the app. -->
 </header> <!-- Close the banner. -->
 <main> <!-- Open the main content column. -->
+<nav class="tabs"> <!-- Tab bar (Stage 3c): switch between the v1 one-shot forge and the Live study loop. -->
+<button type="button" class="tabbtn active" id="tabForgeBtn">🔨 One-shot quiz (v1)</button> <!-- Tab one: the original generator. -->
+<button type="button" class="tabbtn" id="tabLiveBtn">🔴 Live study loop</button> <!-- Tab two: the agentic loop, new in Live. -->
+</nav> <!-- Close the tab bar. -->
+<div id="paneForge"> <!-- Pane one: the v1 one-shot quiz, markup and behavior unchanged. -->
 <section> <!-- Open the input card. -->
 <h2>1 · Your study material</h2> <!-- Step one heading. -->
 <textarea id="material" placeholder="Paste your notes, a textbook section, or any study text here (a few paragraphs minimum)…"></textarea> <!-- Paste area for the study text. -->
@@ -73,6 +92,45 @@ footer { text-align: center; opacity: 0.7; padding-bottom: 30px; font-style: ita
 <div id="reviewPlan"></div> <!-- Container for the spaced-repetition review plan. -->
 <div id="answerKey" class="hidden"></div> <!-- Container for the printable answer key. -->
 </section> <!-- Close the quiz card. -->
+</div> <!-- Close pane one (the v1 one-shot quiz). -->
+<div id="paneLive" class="hidden"> <!-- Pane two (Stage 3c): the Live study loop, hidden until its tab is chosen. -->
+<section> <!-- Open the Live setup card. -->
+<h2>Live · 1 — Session setup</h2> <!-- Live step one heading. -->
+<div class="mode" id="liveMode">Checking which engines are configured…</div> <!-- Honesty banner: filled from /api/status so the page names the real engine route. -->
+<p>The Live loop is an agent, not a one-shot generator: it <strong>plans</strong> a round from a bounded learner state (the Meterless Markovian Engine), <strong>generates</strong> the questions, <strong>grades</strong> your answers with evidence-backed explanations, then <strong>adapts</strong> — the next round focuses on exactly what you missed. The state it carries is shown on screen, never just the raw history.</p> <!-- Plain-language loop explainer. -->
+<textarea id="liveMaterial" placeholder="Paste study material for the Live session, or load the bundled sample below…"></textarea> <!-- Paste area for the Live session's study text. -->
+<div class="row"> <!-- Open the Live setup control row. -->
+<button type="button" class="secondary" id="liveSampleBtn">Load bundled sample (first-responder)</button> <!-- Button that loads the demo curriculum text. -->
+<label>Topic: <input type="text" class="topicin" id="liveTopic" value="First Aid" size="14"></label> <!-- Session topic label the planner aims at. -->
+<label>Questions: <select id="liveCountSel"> <!-- Label and dropdown for the round size. -->
+<option value="4">4</option> <!-- Four-question round. -->
+<option value="6" selected>6</option> <!-- Six-question round, chosen by default. -->
+<option value="8">8</option> <!-- Eight-question round. -->
+</select></label> <!-- Close the count label and dropdown. -->
+<button type="button" id="liveStartBtn">Start round 1 ▶</button> <!-- Button that begins a fresh Live session. -->
+</div> <!-- Close the Live setup control row. -->
+<p class="status" id="liveStatus"></p> <!-- Status line for Live setup progress and errors. -->
+</section> <!-- Close the Live setup card. -->
+<section id="liveRoundCard" class="hidden"> <!-- Live round card, revealed when a round is planned. -->
+<h2>Live · 2 — <span id="liveRoundTitle">Round 1</span></h2> <!-- Live step two heading with the round number filled in. -->
+<div id="livePlan"></div> <!-- Container the script fills with the round's plan and learner state. -->
+<div id="liveQuestions"></div> <!-- Container the script fills with the round's questions. -->
+<div class="row"> <!-- Open the Live grading control row. -->
+<button type="button" id="liveGradeBtn">Grade this round</button> <!-- Button that sends the answers to /api/grade. -->
+</div> <!-- Close the Live grading control row. -->
+<p class="status" id="liveRoundStatus"></p> <!-- Status line for round progress and errors. -->
+</section> <!-- Close the Live round card. -->
+<section id="liveResultsCard" class="hidden"> <!-- Live results card, revealed after grading. -->
+<h2>Live · 3 — Results &amp; the next round</h2> <!-- Live step three heading. -->
+<p class="score" id="liveScore"></p> <!-- Score line for the graded round. -->
+<div id="liveResults"></div> <!-- Container the script fills with per-question verdicts and explanations. -->
+<p id="liveMisses"></p> <!-- Line naming this round's missed topics: the next plan's focus. -->
+<div class="row"> <!-- Open the next-round control row. -->
+<button type="button" id="liveNextBtn">Plan the next round →</button> <!-- Button that asks the agent to adapt and deal the next round. -->
+</div> <!-- Close the next-round control row. -->
+<p class="status" id="liveSession"></p> <!-- Session strip: rounds played and running totals. -->
+</section> <!-- Close the Live results card. -->
+</div> <!-- Close pane two (the Live study loop). -->
 </main> <!-- Close the main content column. -->
 <footer>QuizForge — built fresh for the Build With AI: Basics hackathon. Works with a free-tier AI model, and falls back to a built-in offline engine when no key is present.</footer> <!-- Small-print footer. -->
 <script> /* Open the embedded script: all interactivity lives here, no external JS files. */
@@ -202,5 +260,189 @@ function escapeHtml(text) { // Define a tiny HTML escaper so user text can never
   return div.innerHTML; // Read back the safely encoded HTML.
 } // Close the escaper.
 </script> <!-- Close the embedded script. -->
+<script> /* Open the Stage 3c script: the Live study loop UI. Separate block, so the v1 script above stays untouched. */
+"use strict"; // Enable strict mode for this block too.
+// --- Live session state (all of it lives in this tab; nothing is stored server-side). --- // Section: state.
+let liveHistory = []; // Graded answers so far, in the API's history shape: {topic, correct} per answer.
+let liveQuestions = []; // The current round's questions, exactly as the server sent them.
+let liveGuide = []; // The current round's study guide, reused as citation sources when grading.
+let liveRoundNum = 0; // How many rounds this session has dealt (0 = not started).
+let liveTopic = "First Aid"; // The session topic, snapshotted when the session starts.
+let liveText = ""; // The session study text, snapshotted when the session starts.
+let liveCount = 6; // The session round size, snapshotted when the session starts.
+let liveTotalCorrect = 0; // Running correct count across the whole session.
+let liveTotalAnswered = 0; // Running answered count across the whole session.
+// --- Element handles, grabbed once. --- // Section: elements.
+const liveModeEl = document.getElementById("liveMode"); // The honesty banner in the setup card.
+const liveStatusEl = document.getElementById("liveStatus"); // The setup card's status line.
+const liveRoundStatusEl = document.getElementById("liveRoundStatus"); // The round card's status line.
+// --- Tab wiring: show one pane, hide the other, mark the active tab. --- // Section: tabs.
+document.getElementById("tabForgeBtn").addEventListener("click", function () { showPane("forge"); }); // Wire the v1 tab.
+document.getElementById("tabLiveBtn").addEventListener("click", function () { showPane("live"); }); // Wire the Live tab.
+function showPane(which) { // Define the pane switcher.
+  document.getElementById("paneForge").classList.toggle("hidden", which !== "forge"); // Show the v1 pane only when chosen.
+  document.getElementById("paneLive").classList.toggle("hidden", which !== "live"); // Show the Live pane only when chosen.
+  document.getElementById("tabForgeBtn").classList.toggle("active", which === "forge"); // Mark the v1 tab active when chosen.
+  document.getElementById("tabLiveBtn").classList.toggle("active", which === "live"); // Mark the Live tab active when chosen.
+} // Close the pane switcher.
+// --- Setup wiring: sample loader, session start, grading, next round. --- // Section: wiring.
+document.getElementById("liveSampleBtn").addEventListener("click", loadLiveSample); // Wire the sample button.
+document.getElementById("liveStartBtn").addEventListener("click", startLiveSession); // Wire the session start button.
+document.getElementById("liveGradeBtn").addEventListener("click", gradeLiveRound); // Wire the grade button.
+document.getElementById("liveNextBtn").addEventListener("click", planLiveRound); // Wire the next-round button.
+loadLiveMode(); // Fill the honesty banner as soon as the page loads.
+async function loadLiveMode() { // Define the mode-banner loader: ask /api/status which routes are real.
+  try { // Guard the fetch so a dead server just leaves a plain message.
+    const response = await fetch("/api/status"); // Ask the server for its integration health.
+    const status = await response.json(); // Parse the health snapshot.
+    const budget = status.markovian_engine ? status.markovian_engine.carryover_budget_tokens : 800; // The Markovian carryover budget, from the server.
+    if (status.nemotron_provider) { // A live model route is configured (Nightshift or OpenRouter).
+      liveModeEl.textContent = "Live model route: " + status.nemotron_provider + " (" + (status.nemotron_model || "model") + "). Plans may be model-refined, but every prompt is still bounded by the Markovian learner state (" + budget + "-token carryover budget)."; // Name the real route, honestly.
+    } else { // No model route: the loop runs fully offline, and the banner says so.
+      liveModeEl.textContent = "No live model route configured — running fully offline and keyless: the Markovian engine plans each round and the heuristic engine writes the questions. Add keys to a .env file to light up the live model route."; // The offline truth, up front.
+    } // Close the route branch.
+  } catch (err) { // The status call failed (server down or mid-restart).
+    liveModeEl.textContent = "Could not reach /api/status — the loop itself will report any problem when you start a round."; // Honest fallback message.
+  } // Close the try/catch.
+} // Close the mode-banner loader.
+async function loadLiveSample() { // Define the sample loader for the Live pane.
+  liveStatusEl.textContent = "Loading the bundled sample curriculum…"; // Tell the user what is happening.
+  const response = await fetch("/sample"); // Ask the server for the demo study text.
+  document.getElementById("liveMaterial").value = await response.text(); // Put the sample into the Live textarea.
+  liveStatusEl.textContent = "Sample loaded — the first-responder curriculum. Set your topic and start round 1."; // Confirm and point at the next step.
+} // Close the sample loader.
+function startLiveSession() { // Define the session starter: snapshot the inputs, reset the state, deal round 1.
+  liveText = document.getElementById("liveMaterial").value.trim(); // Snapshot the study text for the whole session.
+  liveTopic = document.getElementById("liveTopic").value.trim() || "General"; // Snapshot the topic, defaulting to General.
+  liveCount = Number(document.getElementById("liveCountSel").value); // Snapshot the round size.
+  liveHistory = []; // A fresh session starts with an empty graded history.
+  liveRoundNum = 0; // No rounds dealt yet.
+  liveTotalCorrect = 0; // Reset the running score.
+  liveTotalAnswered = 0; // Reset the running answer count.
+  document.getElementById("liveResultsCard").classList.add("hidden"); // Hide any results from a previous session.
+  planLiveRound(); // Deal the first round.
+} // Close the session starter.
+async function planLiveRound() { // Define the round dealer: POST /api/round with the accumulated history.
+  const startBtn = document.getElementById("liveStartBtn"); // Grab the start button to disable while working.
+  const nextBtn = document.getElementById("liveNextBtn"); // Grab the next-round button to disable while working.
+  startBtn.disabled = true; // Prevent double-dealing.
+  nextBtn.disabled = true; // Prevent double-dealing from the results card too.
+  liveRoundStatusEl.textContent = ""; // Clear the round status line.
+  liveStatusEl.textContent = "Planning round " + (liveRoundNum + 1) + " from the learner state…"; // Set expectations while waiting.
+  try { // Guard the network call so failures show a friendly message.
+    const response = await fetch("/api/round", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: liveText, topic: liveTopic, history: liveHistory, count: liveCount }) }); // Send text, topic, history, and count.
+    const data = await response.json(); // Parse the round package either way.
+    if (!response.ok) { throw new Error(data.error || "The round could not be planned."); } // Turn server errors into thrown errors with their message.
+    liveRoundNum += 1; // Count the round that was just dealt.
+    liveQuestions = data.questions; // Remember the questions for grading.
+    liveGuide = data.guide || []; // Remember the guide for grading citations.
+    document.getElementById("liveRoundTitle").textContent = "Round " + liveRoundNum; // Label the round card.
+    renderLivePlan(data.plan, data.source); // Draw the plan and the bounded state.
+    renderLiveQuestions(); // Draw the questions.
+    document.getElementById("liveResultsCard").classList.add("hidden"); // Hide the previous round's results while playing.
+    document.getElementById("liveRoundCard").classList.remove("hidden"); // Reveal the round card.
+    document.getElementById("liveRoundCard").scrollIntoView({ behavior: "smooth" }); // Bring the round into view.
+    liveStatusEl.textContent = "Round " + liveRoundNum + " is live — " + liveQuestions.length + " questions. Answer them below, then grade the round."; // Confirm the deal.
+  } catch (err) { // Handle any failure from the try block.
+    liveStatusEl.textContent = "⚠️ " + err.message; // Show the error in the setup status line.
+  } finally { // Always re-enable the buttons afterwards.
+    startBtn.disabled = false; // Allow starting over.
+    nextBtn.disabled = false; // Allow planning again.
+  } // Close the try/catch/finally.
+} // Close the round dealer.
+function renderLivePlan(plan, source) { // Define the plan renderer: engine, focus, difficulty, strategy, and the visible state.
+  const box = document.getElementById("livePlan"); // Grab the plan container.
+  const engineLabel = plan.engine === "nemotron" ? "Nemotron plan (refined from the Markovian state)" : "Markovian engine plan (offline-capable)"; // Name who planned, honestly.
+  const sourceLabel = source === "heuristic" ? "Offline heuristic engine — no AI key (questions built from the text itself)" : "Live model (" + String(source).replace("llm:", "") + ")"; // Name who wrote the questions, honestly.
+  const focusPills = (plan.focus_areas || []).map(function (area) { return "<span class='pill focus'>" + liveEscapeHtml(area) + "</span>"; }).join(""); // One orange pill per focus area.
+  let html = "<p class='planline'><strong>Planned by:</strong> " + liveEscapeHtml(engineLabel) + "</p>"; // Open with the planner line.
+  html += "<p class='planline'><strong>Questions by:</strong> " + liveEscapeHtml(sourceLabel) + "</p>"; // Add the question-source line.
+  html += "<p class='planline'><strong>Focus this round:</strong> " + focusPills + "</p>"; // Add the focus pills.
+  html += "<p class='planline'><strong>Difficulty:</strong> <span class='pill diff'>" + liveEscapeHtml(plan.difficulty || "easy") + "</span></p>"; // Add the difficulty pill.
+  html += "<p class='planline'><strong>Strategy:</strong> " + liveEscapeHtml(plan.strategy || "") + "</p>"; // Add the strategy sentence.
+  html += "<h3>Learner state carried into this round (Markovian carryover, " + (plan.carryover_tokens || 0) + " tokens, compression: " + liveEscapeHtml(plan.state_level || "n/a") + ")</h3>"; // Head the state panel with its size and compression level.
+  html += "<p class='staterow'><strong>COMPLETED:</strong> " + liveEscapeHtml(stateField(plan.state, "COMPLETED")) + "</p>"; // Show what the state says is mastered.
+  html += "<p class='staterow'><strong>REMAINING:</strong> " + liveEscapeHtml(stateField(plan.state, "REMAINING")) + "</p>"; // Show what the state says is still owed.
+  html += "<details><summary>Show the full bounded state block</summary><div class='statebox'>" + liveEscapeHtml(plan.state || "") + "</div></details>"; // Offer the verbatim state block behind a toggle.
+  box.innerHTML = html; // Put the plan on the page.
+} // Close the plan renderer.
+function stateField(state, label) { // Define the state-field extractor: pull one labeled line out of the canonical block.
+  const lines = String(state || "").split("\n"); // Split the block into its labeled lines.
+  for (let i = 0; i < lines.length; i++) { // Walk the lines looking for the label.
+    if (lines[i].indexOf(label + ":") === 0) { return lines[i].slice(label.length + 1).trim() || "—"; } // Return the field's value, or a dash when empty.
+  } // Close the line walk.
+  return "—"; // The field was not present in the block.
+} // Close the state-field extractor.
+function renderLiveQuestions() { // Define the Live question renderer.
+  const box = document.getElementById("liveQuestions"); // Grab the questions container.
+  box.innerHTML = liveQuestions.map(function (q, i) { return liveQuestionHtml(q, i); }).join(""); // Build the HTML for every question.
+} // Close the Live question renderer.
+function liveQuestionHtml(q, i) { // Define the per-question HTML builder for the Live pane.
+  let html = "<div class='question'><p>Q" + (i + 1) + ". " + liveEscapeHtml(q.question) + "<span class='qtopic'>" + liveEscapeHtml(q.topic || "General") + "</span></p>"; // Open the block with the stem and its topic tag.
+  if (q.type === "mcq") { // Multiple-choice questions render as radio options.
+    html += q.options.map(function (opt, j) { return "<label><input type='radio' name='lq" + i + "' value='" + j + "'> " + liveEscapeHtml(opt) + "</label>"; }).join(""); // One labelled radio per option.
+  } else { // Short-answer questions render as a text field.
+    html += "<input type='text' id='live-short-" + i + "' placeholder='Type your answer…'>"; // A single-line answer box.
+  } // Close the type branch.
+  html += "</div>"; // Close the question block (verdicts render in the results card, not here).
+  return html; // Hand the HTML back to the renderer.
+} // Close the per-question builder.
+function collectLiveAnswers() { // Define the answer collector: one answer string per question, in order.
+  return liveQuestions.map(function (q, i) { // Walk the questions with their indexes.
+    if (q.type === "mcq") { // Multiple choice: the answer is the chosen option's TEXT (the grader compares text).
+      const chosen = document.querySelector("input[name='lq" + i + "']:checked"); // Find the selected option, if any.
+      return chosen ? q.options[Number(chosen.value)] : ""; // Unanswered counts as an empty answer, honestly graded as a miss.
+    } // Close the multiple-choice branch.
+    return document.getElementById("live-short-" + i).value.trim(); // Short answer: whatever the learner typed.
+  }); // Close the question walk.
+} // Close the answer collector.
+async function gradeLiveRound() { // Define the grader: POST /api/grade, render verdicts, fold results into history.
+  const button = document.getElementById("liveGradeBtn"); // Grab the grade button to disable while working.
+  button.disabled = true; // Prevent double-grading.
+  liveRoundStatusEl.textContent = "Grading — misses get an evidence-backed explanation…"; // Set expectations while waiting.
+  try { // Guard the network call so failures show a friendly message.
+    const answers = collectLiveAnswers(); // Read the learner's answers off the page.
+    const sources = liveGuide.map(function (entry) { return { source: entry.term, excerpt: entry.point }; }); // Shape the guide as citation sources for the explainer.
+    const response = await fetch("/api/grade", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questions: liveQuestions, answers: answers, topic: liveTopic, sources: sources }) }); // Send questions, answers, topic, and sources.
+    const data = await response.json(); // Parse the grading package either way.
+    if (!response.ok) { throw new Error(data.error || "Grading failed."); } // Turn server errors into thrown errors with their message.
+    data.results.forEach(function (item) { liveHistory.push({ topic: item.topic, correct: item.correct }); }); // Fold the round into the session history (the client's one job in the loop).
+    liveTotalCorrect += data.score; // Add this round's score to the session total.
+    liveTotalAnswered += data.total; // Add this round's question count to the session total.
+    renderLiveResults(data); // Draw the verdicts and explanations.
+    liveRoundStatusEl.textContent = "Round " + liveRoundNum + " graded: " + data.score + " / " + data.total + "."; // Confirm the grading in the round card.
+  } catch (err) { // Handle any failure from the try block.
+    liveRoundStatusEl.textContent = "⚠️ " + err.message; // Show the error in the round status line.
+  } finally { // Always re-enable the button afterwards.
+    button.disabled = false; // Allow grading again.
+  } // Close the try/catch/finally.
+} // Close the grader.
+function renderLiveResults(data) { // Define the results renderer: score, per-question verdicts, misses, session strip.
+  document.getElementById("liveScore").textContent = "Round " + liveRoundNum + " score: " + data.score + " / " + data.total; // Show the round's score.
+  const box = document.getElementById("liveResults"); // Grab the results container.
+  box.innerHTML = data.results.map(function (item, i) { // Build one verdict block per question.
+    let html = "<div class='question'><p>Q" + (i + 1) + " <span class='qtopic'>" + liveEscapeHtml(item.topic || "General") + "</span></p>"; // Open with the question number and topic.
+    html += "<div class='verdict " + (item.correct ? "good" : "bad") + "'>" + (item.correct ? "✅ Correct." : "❌ Missed — you answered “" + liveEscapeHtml(item.given || "") + "”; correct answer: " + liveEscapeHtml(item.expected) + "."); // Show the verdict with both answers on a miss.
+    if (!item.correct && item.explanation) { html += "<span class='explain'>" + liveEscapeHtml(explanationText(item.explanation)) + "</span>"; } // Attach the explanation on misses.
+    html += "</div></div>"; // Close the verdict and the block.
+    return html; // Hand the block back to the map.
+  }).join(""); // Close the verdict map.
+  const misses = data.missed_topics || []; // This round's missed topics, straight from the grader.
+  document.getElementById("liveMisses").innerHTML = misses.length ? "<strong>Missed this round:</strong> " + misses.map(function (t) { return "<span class='pill focus'>" + liveEscapeHtml(t) + "</span>"; }).join("") + " — plan the next round and watch its focus land on exactly these." : "🎉 No misses — the next round advances instead of remediating."; // The money-shot pointer: compare the next plan's focus with these pills.
+  document.getElementById("liveSession").textContent = "Session so far: " + liveRoundNum + " round(s) dealt · " + liveTotalCorrect + " / " + liveTotalAnswered + " correct overall · graded history: " + liveHistory.length + " answers folded into the learner state."; // The session strip.
+  document.getElementById("liveResultsCard").classList.remove("hidden"); // Reveal the results card.
+  document.getElementById("liveResultsCard").scrollIntoView({ behavior: "smooth" }); // Bring the results into view.
+} // Close the results renderer.
+function explanationText(explanation) { // Define the explanation flattener: /api/grade returns an object, older shapes a string.
+  if (typeof explanation === "string") { return explanation; } // A plain string needs no work.
+  const engine = explanation.engine === "nemotron" ? " [explained by Nemotron]" : " [offline explanation]"; // Tag who explained, honestly.
+  return (explanation.explanation || "") + engine; // The explanation text plus its engine tag.
+} // Close the explanation flattener.
+function liveEscapeHtml(text) { // Define the Live pane's own HTML escaper (kept separate from the v1 one on purpose).
+  const div = document.createElement("div"); // Create a scratch element.
+  div.textContent = String(text); // Assign the text as pure text, which encodes special characters.
+  return div.innerHTML; // Read back the safely encoded HTML.
+} // Close the escaper.
+</script> <!-- Close the Stage 3c script. -->
 </body> <!-- Close the visible page body. -->
 </html> <!-- Close the root element. -->

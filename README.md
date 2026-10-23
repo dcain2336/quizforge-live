@@ -30,7 +30,7 @@ python3 app.py         # serve at http://localhost:8765
 
 ## API
 
-- `GET /` — single-page UI · `GET /sample` — demo study text · `GET /health` — liveness
+- `GET /` — single-page UI with two tabs: the v1 one-shot forge, and the **Live study loop** (plan → answer → grade → next round focused on your misses, with the bounded Markovian state — COMPLETED / REMAINING — rendered on screen) · `GET /sample` — demo study text · `GET /health` — liveness
 - `POST /api/generate` — v1 quiz generation (unchanged)
 - `POST /api/round` — plan + generate one agentic round `{text, topic, history, count}`
 - `POST /api/grade` — grade a round, explain misses with citations `{questions, answers, topic, sources}`
